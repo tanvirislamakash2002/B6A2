@@ -5,10 +5,14 @@ const createUser = async (req: Request, res: Response) => {
     try {
         const result = await userServices.createUser(req.body);
         res.status(201).json({
-            success:true
+            success:true,
+            result:result.rows[0]
         })
     }catch(err){
-        console.log(err);
+        res.status(500).json({
+            success:false,
+            result:err
+        })
     }
 }
 
