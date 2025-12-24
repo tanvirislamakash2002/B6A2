@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { userServices } from "./auth.service"
+import { authServices } from "./auth.service"
 
 const createUser = async (req: Request, res: Response) => {
     try {
-        const result = await userServices.createUser(req.body);
+        const result = await authServices.createUser(req.body);
         res.status(201).json({
             success:true,
             result:result.rows[0]
@@ -16,6 +16,6 @@ const createUser = async (req: Request, res: Response) => {
     }
 }
 
-export const userControllers = {
+export const authControllers = {
     createUser
 }
