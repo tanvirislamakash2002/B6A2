@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
+import { bookingsServices } from "./booking.service";
 
-const addForBookings=(req:Request,res:Response)=>{
+const addForBookings= async(req:Request,res:Response)=>{
+    const result = await bookingsServices.addForBookings(req.body)
     res.status(200).json({
         message:'data not found',
-        data:req.body
+        data:result
     })
 }
 
