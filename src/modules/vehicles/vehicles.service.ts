@@ -13,14 +13,24 @@ const getVehicle = async () => {
     return result;
 }
 
-const getSpecificVehicle= async(id:string)=>{
-    console.log(id);
-    const result =await pool.query(`SELECT * FROM vehicles WHERE id=$1`,[id])
+const getSpecificVehicle = async (id: string) => {
+    const result = await pool.query(`SELECT * FROM vehicles WHERE id=$1`, [id])
+    return result;
+}
+
+const updateSpecificVehicle = async (payload: Record<string, unknown>) => {
+    const { vehicle_name, type, registration_number, daily_rent_price, availability_status, id } = payload;
+
+    const result = await pool.query(
+        `UPDATE vehicles SET vehicle_name=$1, type=$2, registration_number=$3, daily_rent_price=$4, availability_status=$5 WHERE id=$6`,
+        [vehicle_name, type, registration_number, daily_rent_price, availability_status, id]
+    )
     return result;
 }
 
 export const vehiclesServices = {
     addNewVehicle,
     getVehicle,
-    getSpecificVehicle
+    getSpecificVehicle,
+    updateSpecificVehicle
 }

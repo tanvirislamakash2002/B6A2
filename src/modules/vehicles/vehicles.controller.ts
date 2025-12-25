@@ -16,30 +16,78 @@ const addNewVehicle = async (req: Request, res: Response) => {
     }
 }
 
-const getVehicle = async (req: Request, res: Response) =>{
-try{
-const result = await vehiclesServices.getVehicle();
-res.status(201).json({
-    success:true,
-    message:result.rows
-})
-}catch(err:any){
-    res.status(500).json({
-        success:false,
-        message:'There is no data'
-    })
-}
+const getVehicle = async (req: Request, res: Response) => {
+    try {
+        const result = await vehiclesServices.getVehicle();
+        res.status(201).json({
+            success: true,
+            message: result.rows
+        })
+    } catch (err: any) {
+        res.status(500).json({
+            success: false,
+            message: 'There is no data'
+        })
+    }
 }
 
-const getSpecificVehicle = async(req:Request, res:Response)=>{
-    const result = await vehiclesServices.getSpecificVehicle(req.params.id as string)
-    res.status(200).json({
-        success:true,
-        details:result.rows
-    })
+const getSpecificVehicle = async (req: Request, res: Response) => {
+    try {
+        const result = await vehiclesServices.getSpecificVehicle(req.params.id as string)
+        if (result.rows.length === 0) {
+
+            res.status(404).json({
+                success: false,
+                message: 'no data available',
+                details: result.rows[0]
+            })
+
+        } else {
+            res.status(200).json({
+                success: true,
+                message: 'successfully fetched data',
+                details: result.rows[0]
+            })
+        }
+
+    } catch (err: any) {
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+
+}
+
+const updateSpecificVehicle = async (req: Request, res: Response) => {
+    const props = req.body;
+    props.id = req.params.id;
+    try {
+        const result = await vehiclesServices.updateSpecificVehicle(props)
+        if (result.rowCount === 0) {
+            res.status(404).json({
+                success: false,
+                message: "data not found",
+                data: result.rows
+            })
+        } else {
+            res.status(200).json({
+                success: true,
+                message: "Successfully updated data",
+                data: result.rows
+            })
+
+        }
+    } catch (err: any) {
+        res.status(200).json({
+            success: false,
+            message: err.message
+        })
+    }
 }
 export const vehicleControllers = {
     addNewVehicle,
     getVehicle,
-    getSpecificVehicle
+    getSpecificVehicle,
+    updateSpecificVehicle
 }

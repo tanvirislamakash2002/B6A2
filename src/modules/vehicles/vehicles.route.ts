@@ -9,4 +9,6 @@ router.get('/', vehicleControllers.getVehicle)
 
 router.get('/:id', vehicleControllers.getSpecificVehicle)
 
+router.put('/:id', vehicleControllers.updateSpecificVehicle)
+
 export const vehicleRoutes = router
