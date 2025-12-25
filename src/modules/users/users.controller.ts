@@ -41,6 +41,11 @@ const getSingleUser = async (req: Request, res: Response) => {
     }
 }
 
+const updateUser =async(req:Request, res:Response)=>{
+    console.log('p',req.params);
+    console.log('b',req.body);
+}
+
 const deleteUser = async (req: Request, res: Response) => {
     try {
         const result = await userServices.deleteUser(req.params.id as string)
@@ -66,5 +71,6 @@ const deleteUser = async (req: Request, res: Response) => {
 export const userControllers = {
     getUser,
     getSingleUser,
+    updateUser,
     deleteUser
 }
