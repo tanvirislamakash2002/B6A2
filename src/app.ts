@@ -12,9 +12,9 @@ app.get('/', (req: Request, res: Response) => {
     res.send('server is running')
 })
 
-app.use('/new', authRoutes)
+app.use('/api/v1/auth', authRoutes)
 
 // user routes
-app.use('/new', userRoutes)
+app.use('/api/v1/users', userRoutes)
 
 export default app;
