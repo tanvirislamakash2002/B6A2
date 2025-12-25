@@ -4,5 +4,6 @@ import { vehicleControllers } from './vehicles.controller';
 const router = express.Router();
 
 router.post('/', vehicleControllers.addNewVehicle)
+router.get('/', vehicleControllers.getVehicle)
 
 export const vehicleRoutes = router
