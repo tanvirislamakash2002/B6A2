@@ -1,9 +1,22 @@
 import { Request, Response } from "express";
+import { vehiclesServices } from "./vehicles.service";
 
-const addNewVehicle=(req:Request,res:Response)=>{
-    console.log(req.body);
+const addNewVehicle = async (req: Request, res: Response) => {
+    try {
+        const result = await vehiclesServices.addNewVehicle(req.body);
+        res.status(201).json({
+            success: true,
+            result: result.rows[0]
+        })
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            result: err
+        })
+    }
 }
 
-export const vehicleControllers={
+
+export const vehicleControllers = {
     addNewVehicle
 }
