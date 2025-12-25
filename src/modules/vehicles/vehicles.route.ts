@@ -11,4 +11,6 @@ router.get('/:id', vehicleControllers.getSpecificVehicle)
 
 router.put('/:id', vehicleControllers.updateSpecificVehicle)
 
+router.delete('/:id', vehicleControllers.deleteVehicle)
+
 export const vehicleRoutes = router
