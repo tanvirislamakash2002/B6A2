@@ -86,32 +86,27 @@ const updateSpecificVehicle = async (req: Request, res: Response) => {
     }
 }
 
-const deleteVehicle =async(req:Request,res:Response)=>{
-    try{
-        const result= await vehiclesServices.deleteVehicle(req.params.id as string)
-// res.status(200).json({
-//     success:true,
-//     message:'Data deleted successfully',
-//     details:result
-// })
+const deleteVehicle = async (req: Request, res: Response) => {
+    try {
+        const result = await vehiclesServices.deleteVehicle(req.params.id as string)
 
-if(result.rowCount===0){
-    res.status(404).json({
-        success:false,
-        message:"No data found",
-        details:result
-    })
-}else{
-    res.status(200).json({
-        success:true,
-        message:"Data deleted successfully",
-        data:result.rows
-    })
-}
-    }catch(err:any){
+        if (result.rowCount === 0) {
+            res.status(404).json({
+                success: false,
+                message: "No data found",
+                details: result
+            })
+        } else {
+            res.status(200).json({
+                success: true,
+                message: "Data deleted successfully",
+                data: result.rows
+            })
+        }
+    } catch (err: any) {
         res.status(500).json({
-            success:false,
-            message:err.message
+            success: false,
+            message: err.message
         })
     }
 }

@@ -3,6 +3,7 @@ import { authRoutes } from './modules/auth/auth.route'
 import initDB from './config/db'
 import { userRoutes } from './modules/users/users.route'
 import { vehicleRoutes } from './modules/vehicles/vehicles.route'
+import { bookingsRoutes } from './modules/bookings/bookings.route'
 const app = express()
 
 app.use(express.json())
@@ -20,5 +21,8 @@ app.use('/api/v1/users', userRoutes)
 
 // vehicles routes
 app.use('/api/v1/vehicles', vehicleRoutes)
+
+// bookings routes
+app.use('/api/v1/bookings', bookingsRoutes)
 
 export default app;
