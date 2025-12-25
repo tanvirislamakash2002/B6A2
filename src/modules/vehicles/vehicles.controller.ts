@@ -30,7 +30,16 @@ res.status(201).json({
     })
 }
 }
+
+const getSpecificVehicle = async(req:Request, res:Response)=>{
+    const result = await vehiclesServices.getSpecificVehicle(req.params.id as string)
+    res.status(200).json({
+        success:true,
+        details:result.rows
+    })
+}
 export const vehicleControllers = {
     addNewVehicle,
-    getVehicle
+    getVehicle,
+    getSpecificVehicle
 }
