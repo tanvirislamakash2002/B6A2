@@ -13,7 +13,7 @@ const getAllBookings = async (req: Request, res: Response) => {
     const result = await bookingsServices.getAllBookings();
     res.status(200).json({
         success: true,
-        data: result
+        data: result.rows
 
     })
 }

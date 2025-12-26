@@ -30,7 +30,9 @@ const addForBookings = async (payload: Record<string, unknown>) => {
 }
 
 const getAllBookings = async () => {
-    const result = pool.query(`SELECT * FROM bookings`)
+    const id = 6;
+    const result = await pool.query(`SELECT * FROM bookings`)
+    // const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=$1`,[id])
     return result
 }
 
