@@ -29,6 +29,12 @@ const addForBookings = async (payload: Record<string, unknown>) => {
     return result;
 }
 
+const getAllBookings = async () => {
+    const result = pool.query(`SELECT * FROM bookings`)
+    return result
+}
+
 export const bookingsServices = {
-    addForBookings
+    addForBookings,
+    getAllBookings
 }
