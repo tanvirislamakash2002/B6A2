@@ -39,7 +39,10 @@ const getAllBookings = async () => {
 const updateBookingsStatus = async (status: string, id: string) => {
     console.log(status, id);
     const result = await pool.query(
-        `UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *`, [status, id]
+        `WITH update_vehicle AS (
+        UPDATE vehicles SET availability_status='booked' RETURNING availability_status
+        )
+        UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *, (SELECT availability_status FROM update_vehicle LIMIT 1) AS availability_status`, [status, id]
     )
     return result
 }
