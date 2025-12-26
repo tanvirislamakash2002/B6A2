@@ -7,4 +7,6 @@ router.post('/', bookingsControllers.addForBookings)
 
 router.get('/', bookingsControllers.getAllBookings)
 
+router.put('/:id', bookingsControllers.updateAvailabilityStatus)
+
 export const bookingsRoutes=router

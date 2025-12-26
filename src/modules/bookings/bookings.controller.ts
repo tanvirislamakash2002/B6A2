@@ -18,7 +18,16 @@ const getAllBookings = async (req: Request, res: Response) => {
     })
 }
 
+const updateAvailabilityStatus = async (req: Request, res: Response) => {
+    const result = await bookingsServices.updateBookingsStatus(req.body.status, req.params.id as string)
+    res.status(200).json({
+        message:'status updated successfully',
+        data:result
+    })
+}
+
 export const bookingsControllers = {
     addForBookings,
-    getAllBookings
+    getAllBookings,
+    updateAvailabilityStatus
 }
