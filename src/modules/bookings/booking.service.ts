@@ -19,30 +19,41 @@ const addForBookings = async (payload: Record<string, unknown>) => {
 
     const total_price = durationDays * daily_rent_price
 
-    const updateAvailabilityStatus = await pool.query(
-        `UPDATE vehicles SET availability_status=$2 WHERE id=$1`, [vehicle_id, 'booked',]
-    )
+    // const updateAvailabilityStatus = await pool.query(
+    //     `UPDATE vehicles SET availability_status=$2 WHERE id=$1`, [vehicle_id, 'booked',]
+    // )
     const result = await pool.query(
-        `INSERT INTO bookings(customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, status) VALUES($1, $2, $3, $4, $5, $6) RETURNING *`, [customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, 'active']
+        `WITH update_vehicles AS (UPDATE vehicles SET availability_status=$7 WHERE id=$2 RETURNING vehicle_name, daily_rent_price)
+        INSERT INTO bookings(customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, status) VALUES($1, $2, $3, $4, $5, $6) RETURNING *,
+        (SELECT json_build_object('vehicle_name',vehicle_name,'daily_rent_price',daily_rent_price) FROM update_vehicles LIMIT 1) AS vehicle
+        `, [customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, 'active', 'booked']
     )
-    result.rows[0].vehicle = { vehicle_name, daily_rent_price }
+    // result.rows[0].vehicle = { vehicle_name, daily_rent_price }
     return result;
 }
 
 const getAllBookings = async () => {
     const id = 6;
-    const result = await pool.query(`SELECT * FROM bookings`)
-    // const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=$1`,[id])
+    // const result = await pool.query(`SELECT * FROM bookings`)
+    const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=$1`,[id])
     return result
 }
 
 const updateBookingsStatus = async (status: string, id: string) => {
 
+    // const result = await pool.query(
+    //     `UPDATE bookings SET status=$1 
+    //     WHERE id=$2 RETURNING *`, [status, id]
+    // )
     const result = await pool.query(
         `WITH update_vehicle AS (
-        UPDATE vehicles SET availability_status=$3 WHERE id= (SELECT vehicle_id FROM bookings WHERE id = $2) RETURNING availability_status
+        UPDATE vehicles SET availability_status=$3 
+        WHERE id= (SELECT vehicle_id FROM bookings WHERE id = $2) 
+        RETURNING availability_status
         )
-        UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *, (SELECT json_build_object('availability_status',availability_status) FROM update_vehicle LIMIT 1) AS vehicle`, [status, id, 'available']
+        UPDATE bookings SET status=$1 
+        WHERE id=$2 RETURNING *, 
+        (SELECT json_build_object('availability_status',availability_status) FROM update_vehicle LIMIT 1) AS vehicle`, [status, id, 'available']
     )
     return result
 }
