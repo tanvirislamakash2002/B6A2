@@ -25,4 +25,13 @@ app.use('/api/v1/vehicles', vehicleRoutes)
 // bookings routes
 app.use('/api/v1/bookings', bookingsRoutes)
 
+// not found route
+app.use((req,res)=>{
+    res.status(404).json({
+        success:false,
+        message:"Route not found",
+        path:req.path
+    })
+})
+
 export default app;
