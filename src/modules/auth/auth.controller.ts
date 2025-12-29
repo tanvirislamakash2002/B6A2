@@ -17,5 +17,6 @@ const createUser = async (req: Request, res: Response) => {
 }
 
 export const authControllers = {
-    createUser
+    createUser,
+    loginUser
 }
