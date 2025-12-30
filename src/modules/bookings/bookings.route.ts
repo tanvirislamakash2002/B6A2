@@ -6,8 +6,8 @@ const router = express.Router()
 
 router.post('/', bookingsControllers.addForBookings)
 
-router.get('/',auth('admin', 'customer'), bookingsControllers.getAllBookings)
+router.get('/', auth('admin', 'customer'), bookingsControllers.getAllBookings)
 
-router.put('/:id', bookingsControllers.updateAvailabilityStatus)
+router.put('/:id', auth('admin', 'customer'), bookingsControllers.updateAvailabilityStatus)
 
-export const bookingsRoutes=router
+export const bookingsRoutes = router

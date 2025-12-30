@@ -40,33 +40,34 @@ const getAllBookings = async (user: JwtPayload) => {
     } else if (user.role === 'customer') {
         const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.email])
         return result
-    }else{
+    } else {
         return null
     }
 }
 
-const updateBookingsStatus = async (status: string, user: JwtPayload) => {
-if(user.role==='admin'){
-    const result = await pool.query(
-        `UPDATE bookings SET status=$1 
-        WHERE id=$2 RETURNING *`, [status, user.email]
-    )
-    return result
-}else if(user.role==='customer'){
-    const result = await pool.query(
-        `WITH update_vehicle AS (
+const updateBookingsStatus = async (id: string, status: string, user: JwtPayload) => {
+
+    if (user.role === 'admin' && status === 'returned') {
+        const result = await pool.query(
+            `WITH update_vehicle AS (
         UPDATE vehicles SET availability_status=$3 
         WHERE id= (SELECT vehicle_id FROM bookings WHERE id = $2) 
         RETURNING availability_status
         )
         UPDATE bookings SET status=$1 
         WHERE id=$2 RETURNING *, 
-        (SELECT json_build_object('availability_status',availability_status) FROM update_vehicle LIMIT 1) AS vehicle`, [status, user.email, 'available']
-    )
-    return result
-}else{
-    return null
-}
+        (SELECT json_build_object('availability_status',availability_status) FROM update_vehicle LIMIT 1) AS vehicle`, [status, id, 'available']
+        )
+        return result
+    } else if (user.role === 'customer' && status === 'cancelled') {
+        const result = await pool.query(
+            `UPDATE bookings SET status=$1 
+        WHERE id=$2 RETURNING *`, [status, id]
+        )
+        return result
+    } else {
+        return null
+    }
 }
 
 export const bookingsServices = {
