@@ -21,7 +21,6 @@ const getAllBookings = async (req: Request, res: Response) => {
     } else {
         successMessage = 'unauthorize access'
     }
-    console.log('admin0', req.user && req.user, successMessage);
     try {
         const result = await bookingsServices.getAllBookings(req.user as JwtPayload);
         if (result === null) {
@@ -43,8 +42,8 @@ const getAllBookings = async (req: Request, res: Response) => {
             } else {
 
                 res.status(200).json({
+                    success: true,
                     message: successMessage,
-                    success: 'successMessage',
                     data: result.rows
                 })
             }
@@ -56,7 +55,7 @@ const getAllBookings = async (req: Request, res: Response) => {
 }
 
 const updateAvailabilityStatus = async (req: Request, res: Response) => {
-    const result = await bookingsServices.updateBookingsStatus(req.body.status, req.params.id as string)
+    const result = await bookingsServices.updateBookingsStatus(req.body.status, req.user as JwtPayload)
     res.status(200).json({
         message: 'status updated successfully',
         data: result

@@ -45,12 +45,14 @@ const getAllBookings = async (user: JwtPayload) => {
     }
 }
 
-const updateBookingsStatus = async (status: string, id: string) => {
-
-    // const result = await pool.query(
-    //     `UPDATE bookings SET status=$1 
-    //     WHERE id=$2 RETURNING *`, [status, id]
-    // )
+const updateBookingsStatus = async (status: string, user: JwtPayload) => {
+if(user.role==='admin'){
+    const result = await pool.query(
+        `UPDATE bookings SET status=$1 
+        WHERE id=$2 RETURNING *`, [status, user.email]
+    )
+    return result
+}else if(user.role==='customer'){
     const result = await pool.query(
         `WITH update_vehicle AS (
         UPDATE vehicles SET availability_status=$3 
@@ -59,9 +61,12 @@ const updateBookingsStatus = async (status: string, id: string) => {
         )
         UPDATE bookings SET status=$1 
         WHERE id=$2 RETURNING *, 
-        (SELECT json_build_object('availability_status',availability_status) FROM update_vehicle LIMIT 1) AS vehicle`, [status, id, 'available']
+        (SELECT json_build_object('availability_status',availability_status) FROM update_vehicle LIMIT 1) AS vehicle`, [status, user.email, 'available']
     )
     return result
+}else{
+    return null
+}
 }
 
 export const bookingsServices = {
