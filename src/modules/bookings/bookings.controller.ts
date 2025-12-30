@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { bookingsServices } from "./booking.service";
+import { JwtPayload } from "jsonwebtoken";
 
 const addForBookings = async (req: Request, res: Response) => {
     const result = await bookingsServices.addForBookings(req.body)
@@ -10,10 +11,11 @@ const addForBookings = async (req: Request, res: Response) => {
 }
 
 const getAllBookings = async (req: Request, res: Response) => {
-    const result = await bookingsServices.getAllBookings();
+    const result = await bookingsServices.getAllBookings(req.user as JwtPayload);
     res.status(200).json({
         success: true,
-        data: result.rows
+        data: result.rows,
+        user: req.user
 
     })
 }
@@ -21,8 +23,8 @@ const getAllBookings = async (req: Request, res: Response) => {
 const updateAvailabilityStatus = async (req: Request, res: Response) => {
     const result = await bookingsServices.updateBookingsStatus(req.body.status, req.params.id as string)
     res.status(200).json({
-        message:'status updated successfully',
-        data:result
+        message: 'status updated successfully',
+        data: result
     })
 }
 

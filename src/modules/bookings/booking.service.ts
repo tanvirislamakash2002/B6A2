@@ -1,3 +1,4 @@
+import { JwtPayload } from "jsonwebtoken";
 import { pool } from "../../config/db";
 
 const addForBookings = async (payload: Record<string, unknown>) => {
@@ -32,11 +33,14 @@ const addForBookings = async (payload: Record<string, unknown>) => {
     return result;
 }
 
-const getAllBookings = async () => {
-    const id = 6;
-    // const result = await pool.query(`SELECT * FROM bookings`)
-    const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=$1`,[id])
-    return result
+const getAllBookings = async (user: JwtPayload) => {
+    if (user.role === 'admin') {
+        const result = await pool.query(`SELECT * FROM bookings`)
+        return result
+    } else if (user.role === 'customer') {
+        const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=$1`, [user.email])
+        return result
+    }
 }
 
 const updateBookingsStatus = async (status: string, id: string) => {

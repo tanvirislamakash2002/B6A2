@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.post('/', bookingsControllers.addForBookings)
 
-router.get('/',auth(), bookingsControllers.getAllBookings)
+router.get('/',auth('admin', 'customer'), bookingsControllers.getAllBookings)
 
 router.put('/:id', bookingsControllers.updateAvailabilityStatus)
 
