@@ -11,13 +11,48 @@ const addForBookings = async (req: Request, res: Response) => {
 }
 
 const getAllBookings = async (req: Request, res: Response) => {
-    const result = await bookingsServices.getAllBookings(req.user as JwtPayload);
-    res.status(200).json({
-        success: true,
-        data: result.rows,
-        user: req.user
+    let successMessage;
+    if (req.user) {
+        if (req.user.role === 'admin') {
+            successMessage = 'Bookings retrieved successfully';
+        } else if (req.user.role === 'customer') {
+            successMessage = 'Your bookings retrieved successfully'
+        }
+    } else {
+        successMessage = 'unauthorize access'
+    }
+    console.log('admin0', req.user && req.user, successMessage);
+    try {
+        const result = await bookingsServices.getAllBookings(req.user as JwtPayload);
+        if (result === null) {
+            res.status(404).json({
+                success: true,
+                message: successMessage,
+                data: result,
+                user: req.user
 
-    })
+            })
+
+        } else {
+            if (result.rowCount === 0) {
+
+                res.status(500).json({
+                    message: successMessage,
+                    data: result.rows
+                })
+            } else {
+
+                res.status(200).json({
+                    message: successMessage,
+                    success: 'successMessage',
+                    data: result.rows
+                })
+            }
+        }
+
+    } catch (err: any) {
+
+    }
 }
 
 const updateAvailabilityStatus = async (req: Request, res: Response) => {

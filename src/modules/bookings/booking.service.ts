@@ -38,8 +38,10 @@ const getAllBookings = async (user: JwtPayload) => {
         const result = await pool.query(`SELECT * FROM bookings`)
         return result
     } else if (user.role === 'customer') {
-        const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=$1`, [user.email])
+        const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.email])
         return result
+    }else{
+        return null
     }
 }
 
