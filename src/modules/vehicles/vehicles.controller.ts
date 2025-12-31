@@ -44,26 +44,24 @@ const getVehicle = async (req: Request, res: Response) => {
 const getSpecificVehicle = async (req: Request, res: Response) => {
     try {
         const result = await vehiclesServices.getSpecificVehicle(req.params.id as string)
-        if (result.rows.length === 0) {
-
+        if (result.rowCount === 0) {
             res.status(404).json({
                 success: false,
-                message: 'no data available',
-                details: result.rows[0]
+                message: 'No vehicles found',
+                data: result.rows
             })
-
         } else {
             res.status(200).json({
                 success: true,
-                message: 'successfully fetched data',
-                details: result.rows[0]
+                message: 'Vehicle retrieved successfully',
+                data: result.rows[0]
             })
         }
-
     } catch (err: any) {
         res.status(500).json({
             success: false,
-            message: err.message
+            message: err.message,
+            details: err
         })
     }
 
