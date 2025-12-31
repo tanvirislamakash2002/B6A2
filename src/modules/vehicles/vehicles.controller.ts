@@ -12,7 +12,7 @@ const addNewVehicle = async (req: Request, res: Response) => {
     } catch (err) {
         res.status(500).json({
             success: false,
-            result: err
+            details: err
         })
     }
 }
@@ -20,15 +20,23 @@ const addNewVehicle = async (req: Request, res: Response) => {
 const getVehicle = async (req: Request, res: Response) => {
     try {
         const result = await vehiclesServices.getVehicle();
-        res.status(201).json({
-            success: true,
-            message:'Vehicles retrieved successfully',
-            data: result.rows
-        })
+        if(result.rowCount===0){
+            res.status(200).json({
+                success:true,
+                message:'No vehicles found',
+                data:result.rows
+            })
+        }else{
+            res.status(200).json({
+                success: true,
+                message:'Vehicles retrieved successfully',
+                data: result.rows
+            })
+        }
     } catch (err: any) {
         res.status(500).json({
             success: false,
-            message: 'There is no data'
+            details: err
         })
     }
 }
