@@ -16,9 +16,9 @@ const addForBookings = async (payload: Record<string, unknown>) => {
     const startDate = new Date(rent_start_date as string)
     const endDate = new Date(rent_end_date as string)
 
-    const durationDays = Math.ceil(endDate.getTime() - startDate.getTime()) / (60 * 60 * 24 * 1000)
+    const number_of_days = Math.ceil(endDate.getTime() - startDate.getTime()) / (60 * 60 * 24 * 1000)
 
-    const total_price = durationDays * daily_rent_price
+    const total_price = number_of_days * daily_rent_price
 
     // const updateAvailabilityStatus = await pool.query(
     //     `UPDATE vehicles SET availability_status=$2 WHERE id=$1`, [vehicle_id, 'booked',]
