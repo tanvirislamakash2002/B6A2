@@ -23,7 +23,8 @@ try{
     const result = await authServices.loginUser(email, password);
 
     res.status(200).json({
-        success:false,
+        success:true,
+        message:'Login successful',
         data:result
     })
 }catch(err:any){

@@ -17,17 +17,24 @@ const loginUser = async (email: string, password: string) => {
     const result = await pool.query(`SELECT * FROM users WHERE email=$1`, [email])
     if (result.rows.length === 0) return null;
 
-    const user = result.rows[0]
+    const {id, name, email:dbEmail, password:hashedPass, phone, role} = result.rows[0]
 
-    const match = await bcrypt.compare(password, user.password)
+    const match = await bcrypt.compare(password, hashedPass)
 
     if (!match) {
         return false
     }
-    const token = jwt.sign({ name: user.name, email: user.email, role:user.role }, config.jwtSecret as string, {
+    const token = jwt.sign({ name, dbEmail, role }, config.jwtSecret as string, {
         expiresIn: "7d"
     })
-    console.log({ token });
+    const plusPhone= '+'+phone
+    const user={
+        id,
+        name,
+        email:dbEmail,
+        phone:plusPhone,
+        role
+    }
     return { token, user }
 }
 
