@@ -4,10 +4,18 @@ import { JwtPayload } from "jsonwebtoken";
 
 const addForBookings = async (req: Request, res: Response) => {
     const result = await bookingsServices.addForBookings(req.body)
-    res.status(200).json({
-        message: 'data not found',
-        data: result
-    })
+    if(!result){
+        res.status(404).json({
+            success:false,
+            message:'No vehicle available for booking'
+        })
+    }else{
+        res.status(200).json({
+            success:true,
+            message:'Booking created successfully',
+            data:result.rows[0]
+        })
+    }
 }
 
 const getAllBookings = async (req: Request, res: Response) => {
@@ -89,10 +97,6 @@ const updateAvailabilityStatus = async (req: Request, res: Response) => {
                 })
             }
         }
-        res.status(200).json({
-            message: successMessage,
-            data: result
-        })
 
     } catch (err: any) {
         res.status(500).json({

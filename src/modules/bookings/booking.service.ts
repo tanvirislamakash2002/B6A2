@@ -7,11 +7,10 @@ const addForBookings = async (payload: Record<string, unknown>) => {
     const checkIsAvailable = await pool.query(
         `SELECT id, vehicle_name, daily_rent_price, availability_status FROM vehicles WHERE id = $1 AND availability_status = 'available' FOR UPDATE`, [vehicle_id]
     )
-    if (checkIsAvailable.rowCount === 0) {
-        return 'there is no vehicle available'
-    }
 
-    const { vehicle_name, daily_rent_price } = checkIsAvailable.rows[0]
+    if (checkIsAvailable.rowCount === 0) return false;
+
+    const { daily_rent_price } = checkIsAvailable.rows[0]
 
     const startDate = new Date(rent_start_date as string)
     const endDate = new Date(rent_end_date as string)
@@ -20,16 +19,12 @@ const addForBookings = async (payload: Record<string, unknown>) => {
 
     const total_price = number_of_days * daily_rent_price
 
-    // const updateAvailabilityStatus = await pool.query(
-    //     `UPDATE vehicles SET availability_status=$2 WHERE id=$1`, [vehicle_id, 'booked',]
-    // )
     const result = await pool.query(
         `WITH update_vehicles AS (UPDATE vehicles SET availability_status=$7 WHERE id=$2 RETURNING vehicle_name, daily_rent_price)
         INSERT INTO bookings(customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, status) VALUES($1, $2, $3, $4, $5, $6) RETURNING *,
         (SELECT json_build_object('vehicle_name',vehicle_name,'daily_rent_price',daily_rent_price) FROM update_vehicles LIMIT 1) AS vehicle
         `, [customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, 'active', 'booked']
     )
-    // result.rows[0].vehicle = { vehicle_name, daily_rent_price }
     return result;
 }
 

@@ -36,7 +36,6 @@ const updateUser = async (id: string, payload: Record<string, unknown>, user: Jw
 
 const deleteUser = async (id: string) => {
     const checkActiveBookings=await pool.query(`SELECT * FROM bookings WHERE customer_id=$1 AND status=$2`,[id,'active'])
-    console.log(checkActiveBookings.rows);
     if(checkActiveBookings.rows.length===0){
          const result = await pool.query(`DELETE FROM users WHERE id = $1`, [id])
          return true;
