@@ -31,20 +31,18 @@ const getAllBookings = async (req: Request, res: Response) => {
     }
     try {
         const result = await bookingsServices.getAllBookings(req.user as JwtPayload);
-        if (result === null) {
+        if (!result) {
             res.status(404).json({
                 success: true,
                 message: successMessage,
                 data: result,
                 user: req.user
-
             })
-
         } else {
             if (result.rowCount === 0) {
-
                 res.status(500).json({
-                    message: successMessage,
+                    success:false,
+                    message: 'No bookings found',
                     data: result.rows
                 })
             } else {

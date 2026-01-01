@@ -29,14 +29,16 @@ const addForBookings = async (payload: Record<string, unknown>) => {
 }
 
 const getAllBookings = async (user: JwtPayload) => {
+    console.log(user);
     if (user.role === 'admin') {
         const result = await pool.query(`SELECT * FROM bookings`)
+        console.log(0);
         return result
     } else if (user.role === 'customer') {
-        const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.email])
+        const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.dbEmail])
         return result
     } else {
-        return null
+        return false
     }
 }
 
