@@ -44,7 +44,6 @@ const getSingleUser = async (req: Request, res: Response) => {
 }
 
 const updateUser = async (req: Request, res: Response) => {
-    // console.log('user from update', req.user);
     try {
         const result = await userServices.updateUser(req.params.id as string, req.body, req.user as JwtPayload);
         if (result === false) {
@@ -86,8 +85,7 @@ const deleteUser = async (req: Request, res: Response) => {
         } else {
             res.status(200).json({
                 success: true,
-                message: "User deleted successfully",
-                data: result.rows
+                message: "User deleted successfully"
             })
         }
     } catch (err: any) {
