@@ -81,7 +81,7 @@ const updateSpecificVehicle = async (req: Request, res: Response) => {
         } else {
             res.status(200).json({
                 success: true,
-                message: "Successfully updated data",
+                message: "Vehicle updated successfully",
                 data: result.rows
             })
 
