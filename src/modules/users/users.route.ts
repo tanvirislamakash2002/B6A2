@@ -1,12 +1,13 @@
 import express from "express"
 import { userControllers } from "./users.controller"
+import auth from "../../middleware/auth"
 const router = express.Router()
 
-router.get('/', userControllers.getUser)
+router.get('/', auth('admin'), userControllers.getUser)
 
 router.get('/:id', userControllers.getSingleUser)
 
-router.put('/:id', userControllers.updateUser)
+router.put('/:id', auth('admin','customer'), userControllers.updateUser)
 
 router.delete('/:id', userControllers.deleteUser)
 
