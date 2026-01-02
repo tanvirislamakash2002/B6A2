@@ -71,6 +71,7 @@ const updateBookingsStatus = async (id: string, status: string, user: JwtPayload
         console.log(currentDate, rentStartDate);
 
         if (rentStartDate > currentDate) {
+            console.log('gather');
             const result = await pool.query(
                 `UPDATE bookings SET status=$1 
             WHERE id=$2 RETURNING *`, [status, id]
@@ -78,7 +79,7 @@ const updateBookingsStatus = async (id: string, status: string, user: JwtPayload
 
             return result
         } else {
-            
+            console.log('less');
             return false
         }
     } else {

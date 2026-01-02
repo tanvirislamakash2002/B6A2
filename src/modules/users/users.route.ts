@@ -5,7 +5,7 @@ const router = express.Router()
 
 router.get('/', auth('admin'), userControllers.getUser)
 
-router.get('/:id', userControllers.getSingleUser)
+// router.get('/:id', userControllers.getSingleUser)
 
 router.put('/:id', auth('admin','customer'), userControllers.updateUser)
 

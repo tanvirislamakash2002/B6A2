@@ -5,34 +5,41 @@ const createUser = async (req: Request, res: Response) => {
     try {
         const result = await authServices.createUser(req.body);
         res.status(201).json({
-            success:true,
-            message:'User registered successfully',
-            data:result.rows[0]
+            success: true,
+            message: 'User registered successfully',
+            data: result.rows[0]
         })
-    }catch(err){
+    } catch (err:any) {
         res.status(500).json({
-            success:false,
-            result:err
+            success: false,
+            message: err.message,
+            details: err,
         })
     }
 }
 
-const loginUser = async(req:Request, res:Response)=>{
-    const {email, password}=req.body;
-try{
-    const result = await authServices.loginUser(email, password);
-
-    res.status(200).json({
-        success:true,
-        message:'Login successful',
-        data:result
-    })
-}catch(err:any){
-    res.status(500).json({
-        success:false,
-        message:err.message
-    })
-}
+const loginUser = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    try {
+        const result = await authServices.loginUser(email, password);
+        if (!result) {
+            res.status(200).json({
+                success: false,
+                message: 'Failed to login'
+            })
+        } else {
+            res.status(200).json({
+                success: true,
+                message: 'Login successful',
+                data: result
+            })
+        }
+    } catch (err: any) {
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
 }
 
 export const authControllers = {
