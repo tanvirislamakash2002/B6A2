@@ -77,10 +77,10 @@ const updateAvailabilityStatus = async (req: Request, res: Response) => {
     try {
         const result = await bookingsServices.updateBookingsStatus(req.params.id as string, req.body.status, req.user as JwtPayload)
         
-        if(result===null){
+        if(!result){
             res.status(404).json({
                 success:false,
-                message:successMessage
+                message:'You have no permission to update this booking'
             })
         }else{
             if(result.rowCount===0){
@@ -100,8 +100,7 @@ const updateAvailabilityStatus = async (req: Request, res: Response) => {
     } catch (err: any) {
         res.status(500).json({
             success: false,
-            message: err,
-            catch: 'catch the error'
+            message: err
         })
     }
 }

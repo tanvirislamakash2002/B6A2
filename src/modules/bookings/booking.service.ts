@@ -63,13 +63,27 @@ const updateBookingsStatus = async (id: string, status: string, user: JwtPayload
         )
         return result
     } else if (user.role === 'customer' && status === 'cancelled') {
-        const result = await pool.query(
-            `UPDATE bookings SET status=$1 
-        WHERE id=$2 RETURNING *`, [status, id]
+        const getRentStartDate = await pool.query(
+            `SELECT rent_start_date FROM bookings WHERE id=$1`, [id]
         )
-        return result
+        const currentDate = new Date().getTime() / (60 * 60 * 24 * 1000);
+        const rentStartDate = new Date(getRentStartDate.rows[0].rent_start_date).getTime() / (60 * 60 * 24 * 1000);
+        console.log(currentDate, rentStartDate);
+
+        if (rentStartDate > currentDate) {
+            const result = await pool.query(
+                `UPDATE bookings SET status=$1 
+            WHERE id=$2 RETURNING *`, [status, id]
+            )
+
+            return result
+        } else {
+            
+            return false
+        }
     } else {
-        return null
+        
+        return false
     }
 }
 
