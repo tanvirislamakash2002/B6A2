@@ -91,7 +91,8 @@ const updateAvailabilityStatus = async (req: Request, res: Response) => {
             }else{
                 res.status(200).json({
                     success:true,
-                    message:successMessage
+                    message:successMessage,
+                    data:result.rows[0]
                 })
             }
         }

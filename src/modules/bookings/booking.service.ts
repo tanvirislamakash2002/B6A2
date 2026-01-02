@@ -31,11 +31,17 @@ const addForBookings = async (payload: Record<string, unknown>) => {
 const getAllBookings = async (user: JwtPayload) => {
     console.log(user);
     if (user.role === 'admin') {
-        const result = await pool.query(`SELECT * FROM bookings`)
+        const result = await pool.query(`SELECT bookings.* ,
+            (SELECT json_build_object('vehicle_name',vehicle_name,'registration_number',registration_number) FROM vehicles LIMIT 1) AS vehicle FROM bookings`)
         console.log(0);
         return result
     } else if (user.role === 'customer') {
-        const result = await pool.query(`SELECT * FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.dbEmail])
+        const result = await pool.query(`SELECT bookings.* ,
+            (SELECT json_build_object(
+            'vehicle_name',vehicle_name,
+            'registration_number',registration_number,
+            'type',type
+            ) FROM vehicles LIMIT 1) AS vehicle FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.dbEmail])
         return result
     } else {
         return false
