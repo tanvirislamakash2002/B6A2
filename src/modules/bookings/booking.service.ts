@@ -19,31 +19,32 @@ const checkIsAvailable = async (id: string) => {
     )
 }
 
-const getAllBookings = async (user: JwtPayload) => {
-    console.log(user);
-    if (user.role === 'admin') {
-        const result = await pool.query(`SELECT bookings.* ,
-            (SELECT json_build_object('vehicle_name',vehicle_name,'registration_number',registration_number) FROM vehicles LIMIT 1) AS vehicle FROM bookings`)
-        console.log(0);
-        return result
-    } else if (user.role === 'customer') {
-        const result = await pool.query(`SELECT bookings.* ,
+const getAllBookings = async () => {
+    const result = await pool.query(`SELECT bookings.* ,
+            (SELECT json_build_object('name',name,'email',email) FROM users 
+            WHERE users.id=bookings.customer_id) AS customer ,
+            (SELECT json_build_object('vehicle_name',vehicle_name,'registration_number',registration_number) FROM vehicles 
+            WHERE vehicles.id=bookings.vehicle_id) AS vehicle 
+            FROM bookings 
+            `)
+    return result
+}
+
+const getOwnBookings = async (user: JwtPayload) => {
+    const result = await pool.query(`SELECT bookings.id, vehicle_id, rent_start_date, rent_end_date, total_price, status ,
             (SELECT json_build_object(
             'vehicle_name',vehicle_name,
             'registration_number',registration_number,
             'type',type
             ) FROM vehicles LIMIT 1) AS vehicle FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.dbEmail])
-        return result
-    } else {
-        return false
-    }
+    return result
 }
 
-const updateBookingsStatus = async (id: string, status: string, user: JwtPayload) => {
+const statusUpdateByAdmin = async (id: string, status: string) => {
 
-    if (user.role === 'admin' && status === 'returned') {
-        const result = await pool.query(
-            `WITH update_vehicle AS (
+
+    const result = await pool.query(
+        `WITH update_vehicle AS (
         UPDATE vehicles SET availability_status=$3 
         WHERE id= (SELECT vehicle_id FROM bookings WHERE id = $2) 
         RETURNING availability_status
@@ -51,35 +52,36 @@ const updateBookingsStatus = async (id: string, status: string, user: JwtPayload
         UPDATE bookings SET status=$1 
         WHERE id=$2 RETURNING *, 
         (SELECT json_build_object('availability_status',availability_status) FROM update_vehicle LIMIT 1) AS vehicle`, [status, id, 'available']
+    )
+    return result
+
+}
+const statusUpdateByCustomer = async (id: string, status: string) => {
+
+        const result = await pool.query(
+        `WITH updated_booking AS (
+        UPDATE vehicles SET availability_status=$3 
+        WHERE id = (SELECT vehicle_id FROM bookings WHERE id = $2) )
+        UPDATE bookings SET status=$1 
+            WHERE id=$2 RETURNING *`, [status, id, 'available']
         )
+
         return result
-    } else if (user.role === 'customer' && status === 'cancelled') {
-        const getRentStartDate = await pool.query(
-            `SELECT rent_start_date FROM bookings WHERE id=$1`, [id]
-        )
-        const currentDate = new Date().getTime() / (60 * 60 * 24 * 1000);
-        const rentStartDate = new Date(getRentStartDate.rows[0].rent_start_date).getTime() / (60 * 60 * 24 * 1000);
-        console.log(currentDate, rentStartDate);
+    
+}
 
-        if (rentStartDate > currentDate) {
-            const result = await pool.query(
-                `UPDATE bookings SET status=$1 
-            WHERE id=$2 RETURNING *`, [status, id]
-            )
-
-            return result
-        } else {
-            return false
-        }
-    } else {
-
-        return false
-    }
+const getRentStartDate = async (id:string) => {
+    return await pool.query(
+        `SELECT rent_start_date FROM bookings WHERE id=$1`, [id]
+    )
 }
 
 export const bookingsServices = {
     checkIsAvailable,
     addForBookings,
     getAllBookings,
-    updateBookingsStatus
+    getOwnBookings,
+    statusUpdateByAdmin,
+    getRentStartDate,
+    statusUpdateByCustomer
 }

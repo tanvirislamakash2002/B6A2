@@ -21,7 +21,7 @@ const addForBookings = async (req: Request, res: Response) => {
 
             const number_of_days = Math.ceil(endDate.getTime() - startDate.getTime()) / (60 * 60 * 24 * 1000)
 
-            const total_price = number_of_days * daily_rent_price;
+            const total_price = Math.round(number_of_days * daily_rent_price);
 
             const result = await bookingsServices.addForBookings(req.body, total_price as number)
 
@@ -41,37 +41,34 @@ const addForBookings = async (req: Request, res: Response) => {
 }
 
 const getAllBookings = async (req: Request, res: Response) => {
-    let successMessage;
-    if (req.user) {
-        if (req.user.role === 'admin') {
-            successMessage = 'Bookings retrieved successfully';
-        } else if (req.user.role === 'customer') {
-            successMessage = 'Your bookings retrieved successfully'
-        }
-    } else {
-        successMessage = 'unauthorize access'
-    }
+
     try {
-        const result = await bookingsServices.getAllBookings(req.user as JwtPayload);
-        if (!result) {
-            res.status(404).json({
-                success: true,
-                message: successMessage,
-                data: result,
-                user: req.user
-            })
-        } else {
-            if (result.rowCount === 0) {
-                res.status(500).json({
+        if (req.user?.role === 'admin') {
+            const result = await bookingsServices.getAllBookings();
+            if (result.rows.length === 0 || result.rowCount === 0) {
+                res.status(200).json({
                     success: false,
-                    message: 'No bookings found',
-                    data: result.rows
+                    message: 'No Bookings Found'
                 })
             } else {
-
                 res.status(200).json({
                     success: true,
-                    message: successMessage,
+                    message: 'Bookings retrieved successfully',
+                    data: result.rows
+                })
+            }
+        }
+        else if (req.user?.role === 'customer') {
+            const result = await bookingsServices.getOwnBookings(req.user as JwtPayload);
+            if (result.rows.length === 0 || result.rowCount === 0) {
+                res.status(200).json({
+                    success: false,
+                    message: 'No Bookings Found'
+                })
+            } else {
+                res.status(200).json({
+                    success: true,
+                    message: 'Your bookings retrieved successfully',
                     data: result.rows
                 })
             }
@@ -86,43 +83,55 @@ const getAllBookings = async (req: Request, res: Response) => {
 }
 
 const updateAvailabilityStatus = async (req: Request, res: Response) => {
-    let successMessage;
-    if (req.user) {
-        if (req.user.role === 'admin') {
-            successMessage = 'Booking marked as returned. Vehicle is now available'
-        } else if (req.user.role === 'customer') {
-            successMessage = 'Booking cancelled successfully'
-        }
-    } else {
-        successMessage = 'unauthorize access'
-    }
-    try {
-        const result = await bookingsServices.updateBookingsStatus(req.params.id as string, req.body.status, req.user as JwtPayload)
 
-        if (!result) {
-            res.status(404).json({
-                success: false,
-                message: 'You have no permission to update this booking'
+    try {
+
+        if (req.user?.role === 'admin' && req.body.status === 'returned') {
+            const result = await bookingsServices.statusUpdateByAdmin(req.params.id as string, req.body.status)
+
+            res.status(200).json({
+                success: true,
+                message: 'Booking marked as returned. Vehicle is now available',
+                data: result.rows[0]
             })
-        } else {
-            if (result.rowCount === 0) {
-                res.status(500).json({
-                    success: false,
-                    message: 'failed to update'
-                })
-            } else {
+
+        } else if (req.user?.role === 'customer' && req.body.status === 'cancelled') {
+            const get_rent_start_date = await bookingsServices.getRentStartDate(req.params.id as string)
+
+            const currentDate = new Date().getTime() / (60 * 60 * 24 * 1000);
+
+            const rentStartDate = new Date(get_rent_start_date.rows[0].rent_start_date).getTime() / (60 * 60 * 24 * 1000);
+
+            console.log(currentDate, rentStartDate);
+
+            if (rentStartDate > currentDate) {
+                const result = await bookingsServices.statusUpdateByCustomer(req.params.id as string, req.body.status)
+
                 res.status(200).json({
                     success: true,
-                    message: successMessage,
+                    message: 'Booking cancelled successfully',
                     data: result.rows[0]
                 })
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: 'You can not cancel the booking after reaching the start day'
+                })
             }
+
+        }else{
+            res.status(400).json({
+                success:false,
+                message:"You can not update the booking"
+            })
         }
+
 
     } catch (err: any) {
         res.status(500).json({
             success: false,
-            message: err
+            message: err.message,
+            errors: err
         })
     }
 }
