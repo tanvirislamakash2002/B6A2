@@ -26,11 +26,18 @@ const updateUser = async (req: Request, res: Response) => {
 
         if (req.user?.role === 'admin' || checkUser.rows[0].email === req.user?.dbEmail) {
             const result = await userServices.updateUser(req.params.id as string, req.body, req.user as JwtPayload);
-            res.status(200).json({
-                success: true,
-                message: 'User updated successfully',
-                data: result.rows[0]
-            })
+            if (result.rows.length === 0 || result.rowCount === 0) {
+                res.status(404).json({
+                    success: false,
+                    message: 'Failed to update user'
+                })
+            } else {
+                res.status(200).json({
+                    success: true,
+                    message: 'User updated successfully',
+                    data: result.rows[0]
+                })
+            }
         } else {
             res.status(404).json({
                 success: false,
