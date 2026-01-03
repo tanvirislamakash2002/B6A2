@@ -30,7 +30,7 @@ const updateSpecificVehicle = async (payload: Record<string, unknown>) => {
 
 const deleteVehicle=async(id:string)=>{
     const result = await pool.query(
-        `DELETE FROM vehicles WHERE id=$1`,[id]
+        `DELETE FROM vehicles WHERE id=$1 AND availability_status=$2`,[id,'available']
     )
     return result;
 }

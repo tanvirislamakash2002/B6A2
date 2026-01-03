@@ -1,5 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { pool } from "../../config/db";
+
 const getUser = async () => {
     const result = await pool.query(
         `SELECT id, name, email, phone, role FROM users`
@@ -7,46 +8,35 @@ const getUser = async () => {
     return result;
 }
 
-// const getSingleUser = async (id: string) => {
-//     const result = await pool.query(`SELECT * FROM users WHERE id=$1`, [id]);
-//     return result;
-// }
-
 const updateUser = async (id: string, payload: Record<string, unknown>, user: JwtPayload) => {
 
     const { name, email, phone, role: insertedRole } = payload
 
-    const checkUser = await pool.query(`SELECT * FROM users WHERE id=$1`, [id]);
+    const result = await pool.query(
+        `UPDATE users SET name=$1, email=$2, phone=$3, role=$4 WHERE id=$5 RETURNING id, name, email, phone, role`, [name, email, phone, insertedRole, id])
 
-    if (checkUser.rows.length === 0) {
-        return checkUser
-
-    } else {
-        if (user.role === 'admin' || checkUser.rows[0].email === user.dbEmail) {
-            const result = await pool.query(
-                `UPDATE users SET name=$1, email=$2, phone=$3, role=$4 WHERE id=$5 RETURNING id, name, email, phone, role`, [name, email, phone, insertedRole, id])
-            return result
-
-        } else {
-            return false
-        }
-    }
+    return result
 
 }
 
+const checkUser = async (id: string) => {
+    return await pool.query(`SELECT * FROM users WHERE id=$1`, [id])
+}
+
+
 const deleteUser = async (id: string) => {
-    const checkActiveBookings=await pool.query(`SELECT * FROM bookings WHERE customer_id=$1 AND status=$2`,[id,'active'])
-    if(checkActiveBookings.rows.length===0){
-         const result = await pool.query(`DELETE FROM users WHERE id = $1`, [id])
-         return true;
-    }else{
+    const checkActiveBookings = await pool.query(`SELECT * FROM bookings WHERE customer_id=$1 AND status=$2`, [id, 'active'])
+    if (checkActiveBookings.rows.length === 0) {
+        const result = await pool.query(`DELETE FROM users WHERE id = $1`, [id])
+        return true;
+    } else {
         return false
     }
 }
 
 export const userServices = {
     getUser,
-    // getSingleUser,
+    checkUser,
     updateUser,
     deleteUser
 }
