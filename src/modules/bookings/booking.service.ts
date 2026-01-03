@@ -1,23 +1,8 @@
 import { JwtPayload } from "jsonwebtoken";
 import { pool } from "../../config/db";
 
-const addForBookings = async (payload: Record<string, unknown>) => {
+const addForBookings = async (payload: Record<string, unknown>, total_price: number) => {
     const { customer_id, vehicle_id, rent_start_date, rent_end_date } = payload;
-
-    const checkIsAvailable = await pool.query(
-        `SELECT id, vehicle_name, daily_rent_price, availability_status FROM vehicles WHERE id = $1 AND availability_status = 'available' FOR UPDATE`, [vehicle_id]
-    )
-
-    if (checkIsAvailable.rowCount === 0) return false;
-
-    const { daily_rent_price } = checkIsAvailable.rows[0]
-
-    const startDate = new Date(rent_start_date as string)
-    const endDate = new Date(rent_end_date as string)
-
-    const number_of_days = Math.ceil(endDate.getTime() - startDate.getTime()) / (60 * 60 * 24 * 1000)
-
-    const total_price = number_of_days * daily_rent_price
 
     const result = await pool.query(
         `WITH update_vehicles AS (UPDATE vehicles SET availability_status=$7 WHERE id=$2 RETURNING vehicle_name, daily_rent_price)
@@ -26,6 +11,12 @@ const addForBookings = async (payload: Record<string, unknown>) => {
         `, [customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, 'active', 'booked']
     )
     return result;
+}
+
+const checkIsAvailable = async (id: string) => {
+    return await pool.query(
+        `SELECT id, vehicle_name, daily_rent_price, availability_status FROM vehicles WHERE id = $1 AND availability_status = 'available' FOR UPDATE`, [id]
+    )
 }
 
 const getAllBookings = async (user: JwtPayload) => {
@@ -71,7 +62,6 @@ const updateBookingsStatus = async (id: string, status: string, user: JwtPayload
         console.log(currentDate, rentStartDate);
 
         if (rentStartDate > currentDate) {
-            console.log('gather');
             const result = await pool.query(
                 `UPDATE bookings SET status=$1 
             WHERE id=$2 RETURNING *`, [status, id]
@@ -79,16 +69,16 @@ const updateBookingsStatus = async (id: string, status: string, user: JwtPayload
 
             return result
         } else {
-            console.log('less');
             return false
         }
     } else {
-        
+
         return false
     }
 }
 
 export const bookingsServices = {
+    checkIsAvailable,
     addForBookings,
     getAllBookings,
     updateBookingsStatus
