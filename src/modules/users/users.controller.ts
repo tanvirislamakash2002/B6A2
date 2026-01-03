@@ -56,22 +56,26 @@ const updateUser = async (req: Request, res: Response) => {
 
 const deleteUser = async (req: Request, res: Response) => {
     try {
-        const result = await userServices.deleteUser(req.params.id as string)
-        if (result === false) {
-            res.status(404).json({
-                success: false,
-                message: 'Failed to delete user'
-            })
-        } else {
+        const checkActiveBookings = await userServices.checkActiveBookings(req.params.id as string)
+
+        if (checkActiveBookings.rows.length === 0 || checkActiveBookings.rowCount === 0) {
+            const result = await userServices.deleteUser(req.params.id as string)
             res.status(200).json({
                 success: true,
                 message: "User deleted successfully"
             })
+        } else {
+            res.status(404).json({
+                success: false,
+                message: "You can not delete this user. He has active bookings"
+            })
         }
+
     } catch (err: any) {
         res.status(500).json({
             success: false,
-            message: err.message
+            message: err.message,
+            details: err
         })
     }
 }

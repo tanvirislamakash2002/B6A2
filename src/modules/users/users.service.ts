@@ -25,18 +25,19 @@ const checkUser = async (id: string) => {
 
 
 const deleteUser = async (id: string) => {
-    const checkActiveBookings = await pool.query(`SELECT * FROM bookings WHERE customer_id=$1 AND status=$2`, [id, 'active'])
-    if (checkActiveBookings.rows.length === 0) {
-        const result = await pool.query(`DELETE FROM users WHERE id = $1`, [id])
-        return true;
-    } else {
-        return false
-    }
+
+    const result = await pool.query(`DELETE FROM users WHERE id = $1`, [id])
+    return result;
+
+}
+const checkActiveBookings = async (id: string) => {
+    return await pool.query(`SELECT * FROM bookings WHERE customer_id=$1 AND status=$2`, [id, 'active'])
 }
 
 export const userServices = {
     getUser,
     checkUser,
     updateUser,
+    checkActiveBookings,
     deleteUser
 }
