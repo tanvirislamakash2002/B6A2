@@ -102,8 +102,6 @@ const updateAvailabilityStatus = async (req: Request, res: Response) => {
 
             const rentStartDate = new Date(get_rent_start_date.rows[0].rent_start_date).getTime() / (60 * 60 * 24 * 1000);
 
-            console.log(currentDate, rentStartDate);
-
             if (rentStartDate > currentDate) {
                 const result = await bookingsServices.statusUpdateByCustomer(req.params.id as string, req.body.status)
 

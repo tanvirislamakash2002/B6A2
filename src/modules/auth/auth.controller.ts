@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import { authServices } from "./auth.service"
+import bcrypt from "bcryptjs"
+import jwt from 'jsonwebtoken'
+import config from "../../config";
 
 const createUser = async (req: Request, res: Response) => {
     try {
@@ -9,31 +12,57 @@ const createUser = async (req: Request, res: Response) => {
             message: 'User registered successfully',
             data: result.rows[0]
         })
-    } catch (err:any) {
+    } catch (err: any) {
         res.status(500).json({
             success: false,
             message: err.message,
-            details: err,
+            errors: err
         })
     }
 }
 
 const loginUser = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
     try {
-        const result = await authServices.loginUser(email, password);
-        if (!result) {
-            res.status(200).json({
+        const { email, password } = req.body;
+        const result = await authServices.loginUser(email);
+        if (result.rows.length === 0 || result.rowCount === 0) {
+            res.status(400).json({
                 success: false,
-                message: 'Failed to login'
+                message: 'No user available by this email'
             })
         } else {
-            res.status(200).json({
-                success: true,
-                message: 'Login successful',
-                data: result
-            })
+            const { id, name, email: dbEmail, password: hashedPass, phone, role } = result.rows[0]
+
+            const match = await bcrypt.compare(password, hashedPass)
+
+            if (!match) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Incorrect Password'
+                })
+            } else {
+                const token = jwt.sign({ name, dbEmail, role }, config.jwtSecret as string, {
+                    expiresIn: "7d"
+                })
+                const plusPhone = '+' + phone
+                const user = {
+                    id,
+                    name,
+                    email: dbEmail,
+                    phone: plusPhone,
+                    role
+                }
+
+                res.status(200).json({
+                    success: true,
+                    message: 'Login successful',
+                    data: { token, user }
+                })
+            }
         }
+
+
+
     } catch (err: any) {
         res.status(500).json({
             success: false,

@@ -41,8 +41,7 @@ const getOwnBookings = async (user: JwtPayload) => {
 }
 
 const statusUpdateByAdmin = async (id: string, status: string) => {
-
-
+    
     const result = await pool.query(
         `WITH update_vehicle AS (
         UPDATE vehicles SET availability_status=$3 
