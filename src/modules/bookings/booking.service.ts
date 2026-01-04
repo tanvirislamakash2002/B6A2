@@ -36,7 +36,7 @@ const getOwnBookings = async (user: JwtPayload) => {
             'vehicle_name',vehicle_name,
             'registration_number',registration_number,
             'type',type
-            ) FROM vehicles LIMIT 1) AS vehicle FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.dbEmail])
+            ) FROM vehicles LIMIT 1) AS vehicle FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.email])
     return result
 }
 

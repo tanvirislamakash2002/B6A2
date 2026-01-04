@@ -41,7 +41,7 @@ const loginUser = async (req: Request, res: Response) => {
                     message: 'Incorrect Password'
                 })
             } else {
-                const token = jwt.sign({ name, dbEmail, role }, config.jwtSecret as string, {
+                const token = jwt.sign({ name, email:dbEmail, role }, config.jwtSecret as string, {
                     expiresIn: "7d"
                 })
                 const plusPhone = '+' + phone
