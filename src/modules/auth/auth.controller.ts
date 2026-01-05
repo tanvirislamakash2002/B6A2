@@ -6,12 +6,20 @@ import config from "../../config";
 
 const createUser = async (req: Request, res: Response) => {
     try {
-        const result = await authServices.createUser(req.body);
-        res.status(201).json({
-            success: true,
-            message: 'User registered successfully',
-            data: result.rows[0]
-        })
+        if (req.body.password.length >= 6) {
+            res.status(400).json({
+                success: false,
+                message: 'The password should includes minimum 6 character'
+            })
+        }
+        else {
+            const result = await authServices.createUser(req.body);
+            res.status(201).json({
+                success: true,
+                message: 'User registered successfully',
+                data: result.rows[0]
+            })
+        }
     } catch (err: any) {
         res.status(500).json({
             success: false,
@@ -41,7 +49,7 @@ const loginUser = async (req: Request, res: Response) => {
                     message: 'Incorrect Password'
                 })
             } else {
-                const token = jwt.sign({ name, email:dbEmail, role }, config.jwtSecret as string, {
+                const token = jwt.sign({ name, email: dbEmail, role }, config.jwtSecret as string, {
                     expiresIn: "7d"
                 })
                 const plusPhone = '+' + phone
