@@ -7,17 +7,17 @@ import config from "../../config";
 const createUser = async (req: Request, res: Response) => {
     try {
         if (req.body.password.length >= 6) {
-            res.status(400).json({
-                success: false,
-                message: 'The password should includes minimum 6 character'
-            })
-        }
-        else {
             const result = await authServices.createUser(req.body);
             res.status(201).json({
                 success: true,
                 message: 'User registered successfully',
                 data: result.rows[0]
+            })
+        }
+        else {
+            res.status(400).json({
+                success: false,
+                message: 'The password should includes minimum 6 character'
             })
         }
     } catch (err: any) {
