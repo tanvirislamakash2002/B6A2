@@ -8,12 +8,17 @@ const getUser = async () => {
     return result;
 }
 
-const updateUser = async (id: string, payload: Record<string, unknown>, user: JwtPayload) => {
+const updateUser = async (id: string, payload: Record<string, unknown>) => {
 
-    const { name, email, phone, role: insertedRole } = payload
+    const { ...updates } = payload
+
+    const fields = Object.keys(updates)
+    const values = Object.values(updates)
+
+    const setClause = fields.map((field, i) => `${field}=$${i + 1}`).join(', ')
 
     const result = await pool.query(
-        `UPDATE users SET name=$1, email=$2, phone=$3, role=$4 WHERE id=$5 RETURNING id, name, email, phone, role`, [name, email, phone, insertedRole, id])
+        `UPDATE users SET ${setClause} WHERE id=$${fields.length + 1} RETURNING id, name, email, phone, role`, [...values, id])
 
     return result
 
