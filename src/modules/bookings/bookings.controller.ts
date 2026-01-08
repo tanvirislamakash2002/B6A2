@@ -25,7 +25,7 @@ const addForBookings = async (req: Request, res: Response) => {
 
             const result = await bookingsServices.addForBookings(req.body, total_price as number)
 
-            res.status(200).json({
+            res.status(201).json({
                 success: true,
                 message: 'Booking created successfully',
                 data: result.rows[0]

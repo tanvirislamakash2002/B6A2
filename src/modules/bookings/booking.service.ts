@@ -31,12 +31,12 @@ const getAllBookings = async () => {
 }
 
 const getOwnBookings = async (user: JwtPayload) => {
-    const result = await pool.query(`SELECT bookings.id, vehicle_id, rent_start_date, rent_end_date, total_price, status ,
+    const result = await pool.query(`SELECT bookings.*,
             (SELECT json_build_object(
             'vehicle_name',vehicle_name,
             'registration_number',registration_number,
             'type',type
-            ) FROM vehicles LIMIT 1) AS vehicle FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.email])
+            ) FROM vehicles WHERE vehicles.id = bookings.vehicle_id) AS vehicle FROM bookings WHERE customer_id=(SELECT id FROM users WHERE email=$1)`, [user.email])
     return result
 }
 
