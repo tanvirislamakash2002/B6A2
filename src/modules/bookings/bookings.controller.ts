@@ -77,7 +77,8 @@ const getAllBookings = async (req: Request, res: Response) => {
     } catch (err: any) {
         res.status(500).json({
             success: false,
-            message: err
+            message: err.message,
+            errors:err
         })
     }
 }

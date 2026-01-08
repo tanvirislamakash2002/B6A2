@@ -72,7 +72,8 @@ const loginUser = async (req: Request, res: Response) => {
     } catch (err: any) {
         res.status(500).json({
             success: false,
-            message: err.message
+            message: err.message,
+            errors: err
         })
     }
 }
